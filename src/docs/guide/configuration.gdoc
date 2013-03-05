@@ -1,0 +1,147 @@
+Much of the Dropwizard configuration is done in a YAML file. This includes the server and admin HTTP ports, logging options, database settings, etc. This can still be done when using this plugin, but it's best to leverage what is already available in Grails where practical. This can include defining database connectivity in @DataSource.groovy@, but can also extend to using GORM or a NoSQL plugin for persistence, and other plugins and Grails features. For example, Dropwizard has support for Hibernate and Liquibase, but since these are trivial to use in Grails it makes more sense to use the Grails integrations.
+
+h4. Application classes
+
+In a typical Dropwizard application, you define a service class that extends @com.yammer.dropwizard.Service@ which has a @main@ method, and this is the entry point to the application. It configures other helper classes including resources (REST endpoints), health checks, tasks, etc. Using the plugin, much of this is done for you but you can customize most options.
+
+There are three ways to register application classes. The easiest is to use the typical Grails convention-over-configuration approach, and create Groovy classes in @grails-app/dropwizard@. These can include resource classes, which must have a class name ending in "DropwizardResource", health check classes ending in "HealthCheck", and task classes ending in "DropwizardTask". These classes must all have default no-arg constructors and must be written in Groovy.
+
+For more flexibility, you can register classes as Spring beans in @grails-app/conf/spring/resources.groovy@. Then enable the appropriate "autoRegister" property as described below to have the plugin find them and register them in Dropwizard for you. For even more flexibility, you can define a Closure in @Config.groovy@ under the @grails.plugin.dropwizard.initializer@ key that can do additional customization.
+
+h4. YAML
+
+See the Dropwizard documentation for the supported syntax for the configuration file, but you can use this as a template to get started (remove the # characters to uncomment lines):
+
+{code}
+http:
+   port: 8080
+
+#   adminPort: 8081
+
+#   2-1000000
+#   maxThreads: 1024
+
+#   1-1000000
+#   minThreads: 8
+
+#   rootPath: /*
+
+#   one of blocking, legacy, legacy+ssl, nonblocking, nonblocking+ssl
+#   connectorType: blocking
+
+#   maxIdleTime: 200s
+
+#   1-128
+#   acceptorThreads: 1
+
+#   -Thread.NORM_PRIORITY-Thread.NORM_PRIORITY)
+#   acceptorThreadPriorityOffset: 0
+
+#   min -1
+#   acceptQueueSize: -1
+
+#   min 1
+#   maxBufferCount: 1024
+
+#   requestBufferSize: 16KB
+#   requestHeaderBufferSize: 6KB
+#   responseBufferSize: 32KB
+#   responseHeaderBufferSize: 6KB
+
+#   reuseAddress: true
+#   soLingerTime: null
+#   lowResourcesConnectionThreshold: 0
+#   lowResourcesMaxIdleTime: 0s
+#   shutdownGracePeriod: 2s
+#   useServerHeader: false
+#   useDateHeader: true
+#   useForwardedHeaders: true
+#   useDirectBuffers: true
+#   bindHost: null
+#   adminUsername: null
+#   adminPassword: null
+
+#   requestLog:
+#      console:
+#         enabled: true
+#         threshold: Level.ALL
+#         timeZone: UTC
+#         logFormat: null
+#      file:
+#         enabled: false
+#         threshold: Level.ALL
+#         currentLogFilename: null
+#         archive: true
+#         archivedLogFilenamePattern: null
+#         # 1-50
+#         archivedFileCount: 5
+#         timeZone: UTC
+#         logFormat: null
+#
+#      syslog
+#         enabled: false
+#         threshold: Level.ALL
+#         host: localhost
+#         # auth, authpriv, daemon, cron, ftp, lpr, kern, mail, news, syslog, user, uucp, local0, local1, local2, local3, local4, local5, local6, local7
+#         facility: local0
+#         timeZone: UTC
+#         logFormat: null
+
+#      timeZone: UTC
+
+#   gzip:
+#      enabled: true
+#      minimumEntitySize: 256B
+#      bufferSize: 8KB
+#      excludedUserAgents: ImmutableSet<String>
+#      compressedMimeTypes: ImmutableSet<String>
+
+#   ssl:
+#      keyStore: /path/to/file
+#      keyStorePassword: null
+#      keyManagerPassword: null
+#      keyStoreType: JKS
+#      trustStore: /path/to/file
+#      trustStorePassword
+#      trustStoreType: "JKS"
+#      needClientAuth: true/false
+#      wantClientAuth: true/false
+#      certAlias: null
+#      allowRenegotiate: true/false
+#      crlPath: /path/to/file
+#      crldpEnabled: true/false
+#      ocspEnabled: true/false
+#      maxCertPathLength:
+#      ocspResponderUrl:
+#      jceProvider:
+#      validatePeers
+#      supportedProtocols:
+#         - SSLv3
+#         - TLSv1
+#         - TLSv1.1
+#         - TLSv1.2
+
+#   contextParameters:
+#      ImmutableMap<String, String> 
+{code}
+
+h4. Config.groovy
+
+There are a few configuration options for the plugin that are defined in Config.groovy:
+
+{table}
+*Property* | *Default* | *Meaning*
+grails.plugin.dropwizard. banner | none; look for a file named @banner.txt@ in the classpath | the string to display as the startup banner
+grails.plugin.dropwizard. dropwizardContext | "dropwizard" | the string to display as the startup banner
+grails.plugin.dropwizard. autoRegisterResources | @false@ | whether to discover all resource classes registered as Spring beans (i.e. those with a @javax.ws.rs.Path@ annotation)
+grails.plugin.dropwizard. autoRegisterHealthChecks | @false@ | whether to discover all health check classes registered as Spring beans (i.e. those that extend @com.yammer.metrics.core.HealthCheck@ )
+grails.plugin.dropwizard. autoRegisterManaged | @false@ | whether to discover all managed classes registered as Spring beans (i.e. those that implement @com.yammer.dropwizard.lifecycle.Managed@ )
+grails.plugin.dropwizard. autoRegisterLifeCycle | @false@ | whether to discover all lifecycle classes registered as Spring beans (i.e. those that implement @org.eclipse.jetty.util.component.LifeCycle@ )
+grails.plugin.dropwizard. autoRegisterAnnotatedProviders | @false@ | whether to discover all provider classes registered as Spring beans (i.e. those with a @javax.ws.rs.ext.Provider@ annotation)
+grails.plugin.dropwizard. autoRegisterInjectableProviders | @false@ | whether to discover all injectable provider classes registered as Spring beans (i.e. those that implement @com.sun.jersey.spi.inject.InjectableProvider@ )
+grails.plugin.dropwizard. autoRegisterTasks | @false@ | whether to discover all task classes registered as Spring beans (i.e. those that extend @com.yammer.dropwizard.tasks.Task@ )
+grails.plugin.dropwizard. yamlPath | @"classpath:dropwizard.yml"@ | the location of the YAML configuration file; must use Spring resource syntax
+grails.plugin.dropwizard. assets | none | a Map of asset paths to register as @AssetsBundle@s; the keys are the resource paths (relative to the classpath) and the values are the actual URI names to serve as
+grails.plugin.dropwizard. serviceClassName | @"grails.plugin.dropwizard.GrailsService"@ | the name of the service class that configures the application; must have a constructor that takes a Spring @ApplicationContext@ and a @File@ pointing at the YAML configuration file
+grails.plugin.dropwizard. initializer | none | optional closure that can do additional configuration; the arguments will be @com.yammer.dropwizard.config.Bootstrap@, @com.yammer.dropwizard.config.Environment@, @grails.plugin.dropwizard.config.GrailsConfiguration@, and @org.codehaus.groovy.grails.commons.GrailsApplication
+{table}

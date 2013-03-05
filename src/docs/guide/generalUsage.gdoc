@@ -1,0 +1,52 @@
+h4. Usage
+
+Start the application with
+
+{code}
+$ grails run-dropwizard
+{code}
+
+Use CTRL-C to stop.
+
+h4. URLs
+
+As a hybrid application, the Grails URLs and Dropwizard URLs use different context paths. For example the Grails controllers might be configured under http://www.servername.com:8080/app/ and the Dropwizard endpoints under http://www.servername.com:8080/dw/. It would be more convenient to have one as a sub-context, e.g. http://www.servername.com:8080/app/ and http://www.servername.com:8080/app/dw/ but given the approach that Dropwizard uses to determine the resource handlers, this isn't possible.
+
+The context for your Grails controllers is determined the same way as when not using this plugin, i.e. it defaults to the application name but can be overridden. Specify the Dropwizard context with the @grails.plugin.dropwizard.dropwizardContext@ attribute in @Config.groovy@ - it defaults to "dropwizard".
+
+h4. Admin URIs
+
+Dropwizard has an admin servlet with some convenient URIs to monitor your application. By default this port is 8081, and the URIs include:
+
+* http://server:8081/dropwizard/metrics
+** displays extensive runtime and usage information; append ?pretty=true to pretty-print the JSON output
+* http://server:8081/dropwizard/healthcheck
+** runs all health checks and displays their statuses
+* http://server:8081/dropwizard/threads
+** displays a thread dump
+* http://server:8081/dropwizard/ping
+** responds with "pong" as a simple test that something is there
+
+h4. Utility methods
+
+Dropwizard displays all known endpoints at startup, but this information is also available at runtime. Dependency-inject the @dropwizardService@ bean and call
+
+{code}
+def dropwizardService
+
+...
+
+def endpoints = dropwizardService.findEndpoints()
+{code}
+
+This will be a @List@ of @grails.plugin.dropwizard.util.EndpointData@
+
+You can also retrieve information from Dropwizard via the @dropwizard@ Spring bean. This is simply a holder class, and has fields @configuration@ (the @com.yammer.dropwizard.config.Configuration@), @environment@ (the @com.yammer.dropwizard.config.Environment@), and @service@ (the @grails.plugin.dropwizard.GrailsService@)
+
+h4. Domain Object serialization
+
+You can call GORM and use domain classes from your Dropwizard REST resources. Note however that it isn't possible to serialize domain classes using Dropwizard's automatic marshalling since there's no way to exclude non-serializable attributes. Use simple data classes (DTOs) built from domain class instances (they can be written in Groovy) instead.
+
+h4. Reloading
+
+Reloading doesn't currently work. I'm looking into supporting runtime reloading in development mode, and reconfiguring services on the fly.

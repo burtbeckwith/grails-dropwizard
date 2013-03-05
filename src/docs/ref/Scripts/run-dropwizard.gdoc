@@ -1,0 +1,16 @@
+h1. run-dropwizard
+
+h2. Purpose
+
+Starts the Jetty server.
+
+h2. Description
+
+Dropwizard requires Jetty, and a newer version than the current Grails Jetty plugin supports, so this script is needed to start the server. Do not run the @run-app@ script since it will install the Tomcat plugin, and a Grails/Dropwizard application cannot be run as a WAR file (or the run-app equivalent).
+
+Usage:
+{code:java}
+grails [environment] run-dropwizard
+{code}
+
+The script doesn't accept any arguments since all configuration is done in @Config.groovy@ and the specified YAML file. You can run the script in different environments.
