@@ -11,6 +11,7 @@ import grails.plugin.dropwizard.config.GrailsServiceConfiguration;
 import grails.plugin.dropwizard.util.DropwizardUtils;
 import grails.util.BuildSettings;
 import grails.util.BuildSettingsHolder;
+import groovy.lang.Closure;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -50,6 +51,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.sun.jersey.spi.inject.InjectableProvider;
 import com.yammer.dropwizard.Service;
+import com.yammer.dropwizard.assets.AssetsBundle;
 import com.yammer.dropwizard.cli.ServerCommand;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.ConfigurationFactory;
@@ -111,6 +113,8 @@ public class GrailsService extends Service<GrailsConfiguration> {
 		if (grails.util.Environment.isDevelopmentMode()) {
 			environment.setBaseResource(Resource.newResource(new File(BuildSettingsHolder.getSettings().getBaseDir(), "web-app"))); // TODO prod
 		}
+
+		performCustomInitialization(bootstrap, environment, configuration);
 
 		bootstrap.runWithBundles(configuration, environment);
 		run(configuration, environment);
@@ -219,6 +223,37 @@ public class GrailsService extends Service<GrailsConfiguration> {
 	public void initialize(Bootstrap<GrailsConfiguration> bootstrap) {
 		bootstrap.setName("dropwizard-grails");
 		bootstrap.addBundle(new ViewBundle());
+
+		registerAssetsBundles(bootstrap);
+	}
+
+	@SuppressWarnings("rawtypes")
+	protected void performCustomInitialization(Bootstrap<GrailsConfiguration> bootstrap, Environment environment,
+			GrailsConfiguration configuration) {
+
+		Object value = grailsApplication.getFlatConfig().get("grails.plugin.dropwizard.initializer");
+		if (!(value instanceof Closure)) {
+			return;
+		}
+
+		Closure initializer = (Closure) value;
+		initializer.call(new Object[] { bootstrap, environment, configuration, grailsApplication });
+	}
+
+	@SuppressWarnings("rawtypes")
+	protected void registerAssetsBundles(Bootstrap<GrailsConfiguration> bootstrap) {
+
+		Object assets = grailsApplication.getFlatConfig().get("grails.plugin.dropwizard.assets");
+		if (!(assets instanceof Map)) {
+			return;
+		}
+
+		for (Object o : ((Map)assets).entrySet()) {
+			Map.Entry entry = (Map.Entry) o;
+			String resourcePath = entry.getKey().toString();
+			String uriPath = entry.getValue().toString();
+			bootstrap.addBundle(new AssetsBundle(resourcePath, uriPath));
+		}
 	}
 
 	@Override
@@ -408,6 +443,7 @@ public class GrailsService extends Service<GrailsConfiguration> {
 	}
 
 	protected void debug(String message, Object... vars) {
-		log.debug(message, vars);
+		log.info(message, vars);
+//		log.debug(message, vars);
 	}
 }
