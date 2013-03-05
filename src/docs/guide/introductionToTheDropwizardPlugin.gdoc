@@ -1,0 +1,11 @@
+The Dropwizard plugin integrates [Dropwizard|http://dropwizard.codahale.com/] with Grails to make it easy to create REST services using the Dropwizard approach while still using Grails features.
+
+Dropwizard is very opinionated, so several framework and library choices are fixed and cannot be changed:
+* you must use the Jetty server, Tomcat isn't an option
+* Jackson
+* Jersey
+* Logback (this plugin depends on the Grails [logback|http://grails.org/plugin/logback] plugin to provide this)
+
+In addition, the plugin enables the use of Freemarker and Mustache templates for response rendering, although this is optional and you can continue to use Dropwizard's JSON support, or other text-based syntaxes such as XML
+
+Note that since Dropwizard requires Jetty and the current version of Jetty in the Grails Jetty plugin is too old, you should remove any server plugin (i.e. "tomcat") from @BuildConfig.groovy@. Use the plugin's @run-dropwizard@ script to start your application.
