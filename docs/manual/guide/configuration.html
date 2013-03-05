@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>3 Configuration 0.1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introductionToTheDropwizardPlugin.html"><strong>1</strong><span>Introduction to the Dropwizard Plugin</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/gettingStarted.html"><strong>2</strong><span>Getting Started</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/generalUsage.html"><strong>4</strong><span>General Usage</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Adds support for Dropwizard</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/gettingStarted.html">&lt;&lt; <strong>2</strong><span>Getting Started</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/generalUsage.html"><strong>4</strong><span>General Usage</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>3 Configuration - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Burt Beckwith</p>
+
+                    <p><strong>Version:</strong> 0.1</p>
+
+                    
+                </div>
+
+                
+
+                
+<a name="3 Configuration"><!-- Legacy link --></a>
+<h1 id="configuration">3 Configuration</h1>
+Much of the Dropwizard configuration is done in a YAML file. This includes the server and admin HTTP ports, logging options, database settings, etc. This can still be done when using this plugin, but it's best to leverage what is already available in Grails where practical. This can include defining database connectivity in <code>DataSource.groovy</code>, but can also extend to using GORM or a NoSQL plugin for persistence, and other plugins and Grails features. For example, Dropwizard has support for Hibernate and Liquibase, but since these are trivial to use in Grails it makes more sense to use the Grails integrations.<p class="paragraph"/><h4>Application classes</h4><p class="paragraph"/>In a typical Dropwizard application, you define a service class that extends <code>com.yammer.dropwizard.Service</code> which has a <code>main</code> method, and this is the entry point to the application. It configures other helper classes including resources (REST endpoints), health checks, tasks, etc. Using the plugin, much of this is done for you but you can customize most options.<p class="paragraph"/>There are three ways to register application classes. The easiest is to use the typical Grails convention-over-configuration approach, and create Groovy classes in <code>grails-app/dropwizard</code>. These can include resource classes, which must have a class name ending in "DropwizardResource", health check classes ending in "HealthCheck", and task classes ending in "DropwizardTask". These classes must all have default no-arg constructors and must be written in Groovy.<p class="paragraph"/>For more flexibility, you can register classes as Spring beans in <code>grails-app/conf/spring/resources.groovy</code>. Then enable the appropriate "autoRegister" property as described below to have the plugin find them and register them in Dropwizard for you. For even more flexibility, you can define a Closure in <code>Config.groovy</code> under the <code>grails.plugin.dropwizard.initializer</code> key that can do additional customization.<p class="paragraph"/><h4>YAML</h4><p class="paragraph"/>See the Dropwizard documentation for the supported syntax for the configuration file, but you can use this as a template to get started (remove the # characters to uncomment lines):<p class="paragraph"/><div class="code"><pre>http:
+   port: 8080<p class="paragraph"/>&#35;   adminPort: 8081<p class="paragraph"/>&#35;   2&#45;1000000
+&#35;   maxThreads: 1024<p class="paragraph"/>&#35;   1&#45;1000000
+&#35;   minThreads: 8<p class="paragraph"/>&#35;   rootPath: /&#42;<p class="paragraph"/>&#35;   one of blocking, legacy, legacy+ssl, nonblocking, nonblocking+ssl
+&#35;   connectorType: blocking<p class="paragraph"/>&#35;   maxIdleTime: 200s<p class="paragraph"/>&#35;   1&#45;128
+&#35;   acceptorThreads: 1<p class="paragraph"/>&#35;   &#45;<span class="java&#45;object">Thread</span>.NORM_PRIORITY&#45;<span class="java&#45;object">Thread</span>.NORM_PRIORITY)
+&#35;   acceptorThreadPriorityOffset: 0<p class="paragraph"/>&#35;   min &#45;1
+&#35;   acceptQueueSize: &#45;1<p class="paragraph"/>&#35;   min 1
+&#35;   maxBufferCount: 1024<p class="paragraph"/>&#35;   requestBufferSize: 16KB
+&#35;   requestHeaderBufferSize: 6KB
+&#35;   responseBufferSize: 32KB
+&#35;   responseHeaderBufferSize: 6KB<p class="paragraph"/>&#35;   reuseAddress: <span class="java&#45;keyword">true</span>
+&#35;   soLingerTime: <span class="java&#45;keyword">null</span>
+&#35;   lowResourcesConnectionThreshold: 0
+&#35;   lowResourcesMaxIdleTime: 0s
+&#35;   shutdownGracePeriod: 2s
+&#35;   useServerHeader: <span class="java&#45;keyword">false</span>
+&#35;   useDateHeader: <span class="java&#45;keyword">true</span>
+&#35;   useForwardedHeaders: <span class="java&#45;keyword">true</span>
+&#35;   useDirectBuffers: <span class="java&#45;keyword">true</span>
+&#35;   bindHost: <span class="java&#45;keyword">null</span>
+&#35;   adminUsername: <span class="java&#45;keyword">null</span>
+&#35;   adminPassword: <span class="java&#45;keyword">null</span><p class="paragraph"/>&#35;   requestLog:
+&#35;      console:
+&#35;         enabled: <span class="java&#45;keyword">true</span>
+&#35;         threshold: Level.ALL
+&#35;         timeZone: UTC
+&#35;         logFormat: <span class="java&#45;keyword">null</span>
+&#35;      file:
+&#35;         enabled: <span class="java&#45;keyword">false</span>
+&#35;         threshold: Level.ALL
+&#35;         currentLogFilename: <span class="java&#45;keyword">null</span>
+&#35;         archive: <span class="java&#45;keyword">true</span>
+&#35;         archivedLogFilenamePattern: <span class="java&#45;keyword">null</span>
+&#35;         &#35; 1&#45;50
+&#35;         archivedFileCount: 5
+&#35;         timeZone: UTC
+&#35;         logFormat: <span class="java&#45;keyword">null</span>
+&#35;
+&#35;      syslog
+&#35;         enabled: <span class="java&#45;keyword">false</span>
+&#35;         threshold: Level.ALL
+&#35;         host: localhost
+&#35;         &#35; auth, authpriv, daemon, cron, ftp, lpr, kern, mail, news, syslog, user, uucp, local0, local1, local2, local3, local4, local5, local6, local7
+&#35;         facility: local0
+&#35;         timeZone: UTC
+&#35;         logFormat: <span class="java&#45;keyword">null</span><p class="paragraph"/>&#35;      timeZone: UTC<p class="paragraph"/>&#35;   gzip:
+&#35;      enabled: <span class="java&#45;keyword">true</span>
+&#35;      minimumEntitySize: 256B
+&#35;      bufferSize: 8KB
+&#35;      excludedUserAgents: ImmutableSet&#60;<span class="java&#45;object">String</span>&#62;
+&#35;      compressedMimeTypes: ImmutableSet&#60;<span class="java&#45;object">String</span>&#62;<p class="paragraph"/>&#35;   ssl:
+&#35;      keyStore: /path/to/file
+&#35;      keyStorePassword: <span class="java&#45;keyword">null</span>
+&#35;      keyManagerPassword: <span class="java&#45;keyword">null</span>
+&#35;      keyStoreType: JKS
+&#35;      trustStore: /path/to/file
+&#35;      trustStorePassword
+&#35;      trustStoreType: <span class="java&#45;quote">"JKS"</span>
+&#35;      needClientAuth: <span class="java&#45;keyword">true</span>/<span class="java&#45;keyword">false</span>
+&#35;      wantClientAuth: <span class="java&#45;keyword">true</span>/<span class="java&#45;keyword">false</span>
+&#35;      certAlias: <span class="java&#45;keyword">null</span>
+&#35;      allowRenegotiate: <span class="java&#45;keyword">true</span>/<span class="java&#45;keyword">false</span>
+&#35;      crlPath: /path/to/file
+&#35;      crldpEnabled: <span class="java&#45;keyword">true</span>/<span class="java&#45;keyword">false</span>
+&#35;      ocspEnabled: <span class="java&#45;keyword">true</span>/<span class="java&#45;keyword">false</span>
+&#35;      maxCertPathLength:
+&#35;      ocspResponderUrl:
+&#35;      jceProvider:
+&#35;      validatePeers
+&#35;      supportedProtocols:
+&#35;         &#45; SSLv3
+&#35;         &#45; TLSv1
+&#35;         &#45; TLSv1.1
+&#35;         &#45; TLSv1.2<p class="paragraph"/>&#35;   contextParameters:
+&#35;      ImmutableMap&#60;<span class="java&#45;object">String</span>, <span class="java&#45;object">String</span>&#62;</pre></div><p class="paragraph"/><h4>Config.groovy</h4><p class="paragraph"/>There are a few configuration options for the plugin that are defined in Config.groovy:<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Default</strong></th><th><strong class="bold">Meaning</strong></th></tr><tr class="table-odd"><td>grails.plugin.dropwizard. banner</td><td>none; look for a file named <code>banner.txt</code> in the classpath</td><td>the string to display as the startup banner</td></tr><tr class="table-even"><td>grails.plugin.dropwizard. dropwizardContext</td><td>"dropwizard"</td><td>the string to display as the startup banner</td></tr><tr class="table-odd"><td>grails.plugin.dropwizard. autoRegisterResources</td><td><code>false</code></td><td>whether to discover all resource classes registered as Spring beans (i.e. those with a <code>javax.ws.rs.Path</code> annotation)</td></tr><tr class="table-even"><td>grails.plugin.dropwizard. autoRegisterHealthChecks</td><td><code>false</code></td><td>whether to discover all health check classes registered as Spring beans (i.e. those that extend <code>com.yammer.metrics.core.HealthCheck</code> )</td></tr><tr class="table-odd"><td>grails.plugin.dropwizard. autoRegisterManaged</td><td><code>false</code></td><td>whether to discover all managed classes registered as Spring beans (i.e. those that implement <code>com.yammer.dropwizard.lifecycle.Managed</code> )</td></tr><tr class="table-even"><td>grails.plugin.dropwizard. autoRegisterLifeCycle</td><td><code>false</code></td><td>whether to discover all lifecycle classes registered as Spring beans (i.e. those that implement <code>org.eclipse.jetty.util.component.LifeCycle</code> )</td></tr><tr class="table-odd"><td>grails.plugin.dropwizard. autoRegisterAnnotatedProviders</td><td><code>false</code></td><td>whether to discover all provider classes registered as Spring beans (i.e. those with a <code>javax.ws.rs.ext.Provider</code> annotation)</td></tr><tr class="table-even"><td>grails.plugin.dropwizard. autoRegisterInjectableProviders</td><td><code>false</code></td><td>whether to discover all injectable provider classes registered as Spring beans (i.e. those that implement <code>com.sun.jersey.spi.inject.InjectableProvider</code> )</td></tr><tr class="table-odd"><td>grails.plugin.dropwizard. autoRegisterTasks</td><td><code>false</code></td><td>whether to discover all task classes registered as Spring beans (i.e. those that extend <code>com.yammer.dropwizard.tasks.Task</code> )</td></tr><tr class="table-even"><td>grails.plugin.dropwizard. yamlPath</td><td><code>"classpath: dropwizard.yml"</code></td><td>the location of the YAML configuration file; must use Spring resource syntax</td></tr><tr class="table-odd"><td>grails.plugin.dropwizard. assets</td><td>none</td><td>a Map of asset paths to register as <code>AssetsBundle</code>s; the keys are the resource paths (relative to the classpath) and the values are the actual URI names to serve as</td></tr><tr class="table-even"><td>grails.plugin.dropwizard. serviceClassName</td><td><code>"grails.plugin. dropwizard. GrailsService"</code></td><td>the name of the service class that configures the application; must have a constructor that takes a Spring <code>ApplicationContext</code> and a <code>File</code> pointing at the YAML configuration file</td></tr><tr class="table-odd"><td>grails.plugin.dropwizard. initializer</td><td>none</td><td>optional closure that can do additional configuration; the arguments will be <code>com.yammer.dropwizard.config.Bootstrap</code>, <code>com.yammer.dropwizard.config.Environment</code>, <code>grails.plugin.dropwizard.config.GrailsConfiguration</code>, and @org.codehaus.groovy.grails.commons.GrailsApplication</td></tr></table>
+
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/gettingStarted.html">&lt;&lt; <strong>2</strong><span>Getting Started</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/generalUsage.html"><strong>4</strong><span>General Usage</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Scripts</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Scripts/run-dropwizard.html">run-dropwizard</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-16219500-1']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>4 General Usage 0.1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introductionToTheDropwizardPlugin.html"><strong>1</strong><span>Introduction to the Dropwizard Plugin</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/gettingStarted.html"><strong>2</strong><span>Getting Started</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/generalUsage.html"><strong>4</strong><span>General Usage</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Adds support for Dropwizard</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/configuration.html">&lt;&lt; <strong>3</strong><span>Configuration</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+
+
+                <div class="project">
+                    <h1>4 General Usage - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Burt Beckwith</p>
+
+                    <p><strong>Version:</strong> 0.1</p>
+
+                    
+                </div>
+
+                
+
+                
+<a name="4 General Usage"><!-- Legacy link --></a>
+<h1 id="generalUsage">4 General Usage</h1>
+<h4>Usage</h4><p class="paragraph"/>Start the application with<p class="paragraph"/><div class="code"><pre>$ grails run&#45;dropwizard</pre></div><p class="paragraph"/>Use CTRL-C to stop.<p class="paragraph"/><h4>URLs</h4><p class="paragraph"/>As a hybrid application, the Grails URLs and Dropwizard URLs use different context paths. For example the Grails controllers might be configured under http://www.servername.com:8080/app/ and the Dropwizard endpoints under http://www.servername.com:8080/dw/. It would be more convenient to have one as a sub-context, e.g. http://www.servername.com:8080/app/ and http://www.servername.com:8080/app/dw/ but given the approach that Dropwizard uses to determine the resource handlers, this isn't possible.<p class="paragraph"/>The context for your Grails controllers is determined the same way as when not using this plugin, i.e. it defaults to the application name but can be overridden. Specify the Dropwizard context with the <code>grails.plugin.dropwizard.dropwizardContext</code> attribute in <code>Config.groovy</code> - it defaults to "dropwizard".<p class="paragraph"/><h4>Admin URIs</h4><p class="paragraph"/>Dropwizard has an admin servlet with some convenient URIs to monitor your application. By default this port is 8081, and the URIs include:
+<ul class="star">
+<li>http://server:8081/dropwizard/metrics</li>
+<ul class="star">
+<li>displays extensive runtime and usage information; append ?pretty=true to pretty-print the JSON output</li>
+</ul>
+<li>http://server:8081/dropwizard/healthcheck</li>
+<ul class="star">
+<li>runs all health checks and displays their statuses</li>
+</ul>
+<li>http://server:8081/dropwizard/threads</li>
+<ul class="star">
+<li>displays a thread dump</li>
+</ul>
+<li>http://server:8081/dropwizard/ping</li>
+<ul class="star">
+<li>responds with "pong" as a simple test that something is there</li>
+</ul></ul><p class="paragraph"/><h4>Utility methods</h4><p class="paragraph"/>Dropwizard displays all known endpoints at startup, but this information is also available at runtime. Dependency-inject the <code>dropwizardService</code> bean and call<p class="paragraph"/><div class="code"><pre>def dropwizardService<p class="paragraph"/>...<p class="paragraph"/>def endpoints = dropwizardService.findEndpoints()</pre></div><p class="paragraph"/>This will be a <code>List</code> of <code>grails.plugin.dropwizard.util.EndpointData</code><p class="paragraph"/>You can also retrieve information from Dropwizard via the <code>dropwizard</code> Spring bean. This is simply a holder class, and has fields <code>configuration</code> (the <code>com.yammer.dropwizard.config.Configuration</code>), <code>environment</code> (the <code>com.yammer.dropwizard.config.Environment</code>), and <code>service</code> (the <code>grails.plugin.dropwizard.GrailsService</code>)<p class="paragraph"/><h4>Domain Object serialization</h4><p class="paragraph"/>You can call GORM and use domain classes from your Dropwizard REST resources. Note however that it isn't possible to serialize domain classes using Dropwizard's automatic marshalling since there's no way to exclude non-serializable attributes. Use simple data classes (DTOs) built from domain class instances (they can be written in Groovy) instead.<p class="paragraph"/><h4>Reloading</h4><p class="paragraph"/>Reloading doesn't currently work. I'm looking into supporting runtime reloading in development mode, and reconfiguring services on the fly.
+
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/configuration.html">&lt;&lt; <strong>3</strong><span>Configuration</span></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Scripts</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Scripts/run-dropwizard.html">run-dropwizard</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-16219500-1']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+</body>
+</html>
