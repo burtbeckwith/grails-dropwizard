@@ -53,7 +53,7 @@
 		<delete dir='grails-app/taglib' />
 		<delete dir='grails-app/utils' />
 		<delete dir='grails-app/views' />
-		<!--delete dir='lib' / -->
+		<delete dir='lib' />
 		<delete dir='test' />
 		<delete dir='web-app' />
 	</target>
