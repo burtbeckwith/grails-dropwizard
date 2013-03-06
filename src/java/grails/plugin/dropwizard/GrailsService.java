@@ -51,7 +51,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.sun.jersey.spi.inject.InjectableProvider;
 import com.yammer.dropwizard.Service;
-import com.yammer.dropwizard.assets.AssetsBundle;
 import com.yammer.dropwizard.cli.ServerCommand;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.ConfigurationFactory;
@@ -123,7 +122,7 @@ public class GrailsService extends Service<GrailsConfiguration> {
 		displayBanner(logger, environment);
 
 		final Server server = new ServerFactory(configuration.getHttpConfiguration(), environment.getName()).buildServer(environment);
-		configureGrailsContext(server);
+		configureGrailsContext(server, configuration);
 		try {
 			server.start();
 			for (ServerLifecycleListener listener : environment.getServerListeners()) {
@@ -160,7 +159,7 @@ public class GrailsService extends Service<GrailsConfiguration> {
 		}
 	}
 
-	protected void configureGrailsContext(Server server) throws IOException {
+	protected void configureGrailsContext(Server server, GrailsConfiguration configuration) throws IOException {
 
 		BuildSettings settings = BuildSettingsHolder.getSettings();
 		String webAppRoot = new File(settings.getBaseDir(), "web-app").getPath(); // TODO prod
@@ -204,9 +203,10 @@ public class GrailsService extends Service<GrailsConfiguration> {
 		context.setConfigurations(configurations.toArray(new Configuration[configurations.size()]));
 		context.setDescriptor(settings.getWebXmlLocation().getAbsolutePath());
 
-		String dropwizardContext = getConfigValue("dropwizardContext", "dropwizard", CharSequence.class).toString();
-		if (!dropwizardContext.startsWith("/")) {
-			dropwizardContext = '/' + dropwizardContext;
+		String dropwizardContext = calculateDropwizardContext();
+
+		if (!"/".equals(dropwizardContext) && "/*".equals(configuration.getHttpConfiguration().getRootPath())) {
+			configuration.getHttpConfiguration().setRootPath(dropwizardContext + "/*");
 		}
 
 		HandlerCollection handlers = (HandlerCollection) server.getHandler();
@@ -219,11 +219,18 @@ public class GrailsService extends Service<GrailsConfiguration> {
 		server.setHandler(newHandlers);
 	}
 
+	protected String calculateDropwizardContext() {
+		String dropwizardContext = getConfigValue("dropwizardContext", "dropwizard", CharSequence.class).toString();
+		if (!dropwizardContext.startsWith("/")) {
+			dropwizardContext = '/' + dropwizardContext;
+		}
+		return dropwizardContext;
+	}
+
 	@Override
 	public void initialize(Bootstrap<GrailsConfiguration> bootstrap) {
 		bootstrap.setName("dropwizard-grails");
 		bootstrap.addBundle(new ViewBundle());
-
 		registerAssetsBundles(bootstrap);
 	}
 
@@ -244,16 +251,40 @@ public class GrailsService extends Service<GrailsConfiguration> {
 	protected void registerAssetsBundles(Bootstrap<GrailsConfiguration> bootstrap) {
 
 		Object assets = grailsApplication.getFlatConfig().get("grails.plugin.dropwizard.assets");
-		if (!(assets instanceof Map)) {
+		if (!(assets instanceof List)) {
 			return;
 		}
 
-		for (Object o : ((Map)assets).entrySet()) {
-			Map.Entry entry = (Map.Entry) o;
-			String resourcePath = entry.getKey().toString();
-			String uriPath = entry.getValue().toString();
-			bootstrap.addBundle(new AssetsBundle(resourcePath, uriPath));
+		String dropwizardContext = calculateDropwizardContext();
+		String resourcePath;
+		String uriPath;
+		for (Object o : (List)assets) {
+			List assetDef = (List) o;
+			switch (assetDef.size()) {
+				case 1:
+					String path = (String) assetDef.get(0);
+					bootstrap.addBundle(new GrailsAssetsBundle(dropwizardContext, path));
+					break;
+				case 2:
+					resourcePath = startWithSlash((String) assetDef.get(0));
+					uriPath = startWithSlash((String) assetDef.get(1));
+					bootstrap.addBundle(new GrailsAssetsBundle(dropwizardContext, resourcePath, uriPath));
+					break;
+				case 3:
+					resourcePath = startWithSlash((String) assetDef.get(0));
+					uriPath = startWithSlash((String) assetDef.get(1));
+					String indexFile = (String) assetDef.get(2);
+					bootstrap.addBundle(new GrailsAssetsBundle(dropwizardContext, resourcePath, uriPath, indexFile));
+					break;
+			}
 		}
+	}
+
+	protected String startWithSlash(String s) {
+		if (!s.startsWith("/")) {
+			s = '/' + s;
+		}
+		return s;
 	}
 
 	@Override
@@ -443,7 +474,6 @@ public class GrailsService extends Service<GrailsConfiguration> {
 	}
 
 	protected void debug(String message, Object... vars) {
-		log.info(message, vars);
-//		log.debug(message, vars);
+		log.debug(message, vars);
 	}
 }
