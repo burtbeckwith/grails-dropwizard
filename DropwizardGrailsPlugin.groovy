@@ -10,7 +10,7 @@ class DropwizardGrailsPlugin {
 	String authorEmail = 'beckwithb@vmware.com'
 	String title = 'Dropwizard Plugin'
 	String description = 'Adds support for Dropwizard'
-	String documentation = 'http://grails.org/plugin/dropwizard'
+	String documentation = 'http://burtbeckwith.github.com/grails-dropwizard/'
 	List pluginExcludes = [
 		'docs/**',
 		'src/docs/**'
